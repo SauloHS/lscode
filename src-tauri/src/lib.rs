@@ -12,6 +12,7 @@ use tauri::{AppHandle, Emitter, State};
 const IGNORED_DIRS: [&str; 6] = [".git", "node_modules", "target", "dist", ".next", "__pycache__"];
 const MAX_SEARCH_MATCHES: usize = 2000;
 const MAX_SEARCH_FILE_SIZE: u64 = 1_000_000;
+const MAX_WALK_RESULTS: usize = 50_000;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -94,11 +95,14 @@ fn delete_path(path: &str) -> Result<(), String> {
 }
 
 fn walk(root: &Path, out: &mut Vec<String>) {
-    if out.len() > 50000 {
+    if out.len() >= MAX_WALK_RESULTS {
         return;
     }
     let Ok(entries) = fs::read_dir(root) else { return };
     for entry in entries.flatten() {
+        if out.len() >= MAX_WALK_RESULTS {
+            break;
+        }
         let name = entry.file_name().to_string_lossy().into_owned();
         let Ok(ft) = entry.file_type() else { continue };
         if ft.is_dir() {

@@ -19,15 +19,17 @@ let palette: PaletteState | null = null;
 let fileIndex: { path: string; name: string; rel: string }[] = [];
 
 export function buildFileIndex(): Promise<void> {
-  if (!state.root) {
+  const root = state.root;
+  if (!root) {
     fileIndex = [];
     return Promise.resolve();
   }
-  return walkFiles(state.root).then((files) => {
+  return walkFiles(root).then((files) => {
+    if (state.root !== root) return;
     fileIndex = files.map((path) => ({
       path,
       name: basename(path),
-      rel: relative(state.root!, path),
+      rel: relative(root, path),
     }));
   });
 }

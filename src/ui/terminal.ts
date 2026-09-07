@@ -73,7 +73,15 @@ export async function newTerminal(): Promise<void> {
     // container not measurable yet
   }
 
-  const id = await createPty(term.rows, term.cols, state.root);
+  let id: number;
+  try {
+    id = await createPty(term.rows, term.cols, state.root);
+  } catch (error) {
+    term.dispose();
+    element.remove();
+    console.error("Failed to create terminal", error);
+    return;
+  }
   const tabEl = el("div", "terminal-tab");
   const label = el("span", undefined, `pwsh ${id + 1}`);
   const close = el("span", "tab-close");

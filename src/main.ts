@@ -10,9 +10,9 @@ import { hasTauriBackend, listDir } from "./api";
 import { register } from "./commands";
 import { initLayout } from "./layout";
 import { applySettings, settings, updateSettings } from "./settings";
-import { notify, setRoot, state, subscribe } from "./state";
-import { $, el } from "./util";
-import { initEditor, getEditor, saveActive, saveAll, closeTab, closeTabImmediate, refreshTheme, refreshFont, renderBreadcrumbs } from "./ui/editor";
+import { notify, setRoot, state, subscribe, isDirty } from "./state";
+import { $, el, basename } from "./util";
+import { initEditor, getEditor, saveActive, saveAll, saveTab, closeTab, closeTabImmediate, refreshTheme, refreshFont, renderBreadcrumbs } from "./ui/editor";
 import { initTabs } from "./ui/tabs";
 import { initActivitybar, initSidebar, switchView } from "./ui/sidebar";
 import { newFile, newFolder, refreshExplorer } from "./ui/explorer";
@@ -20,7 +20,7 @@ import { initStatusbar } from "./ui/statusbar";
 import { initMenubar } from "./ui/menubar";
 import { initTerminal, newTerminal, togglePanel, refreshTerminalTheme } from "./ui/terminal";
 import { openPalette, buildFileIndex } from "./ui/palette";
-import { confirmDialog } from "./overlay";
+import { confirmDialog, saveChangesDialog } from "./overlay";
 
 const monacoEnvironment: monaco.Environment = {
   getWorker(_moduleId: string, label: string) {
@@ -52,8 +52,20 @@ async function openFolder(): Promise<void> {
   if (typeof dir === "string" && dir.length > 0) await setWorkspace(dir);
 }
 
+async function closeAllTabs(): Promise<boolean> {
+  for (const tab of [...state.tabs]) {
+    if (isDirty(tab)) {
+      const choice = await saveChangesDialog(`Do you want to save the changes you made to ${basename(tab.path)}?`);
+      if (choice === "cancel") return false;
+      if (choice === "save" && !(await saveTab(tab))) return false;
+    }
+    closeTabImmediate(tab.path);
+  }
+  return true;
+}
+
 async function setWorkspace(root: string): Promise<void> {
-  for (const tab of [...state.tabs]) closeTabImmediate(tab.path);
+  if (!(await closeAllTabs())) return;
   setRoot(root);
   localStorage.setItem("lscode.root", root);
   switchView("explorer");
@@ -62,7 +74,7 @@ async function setWorkspace(root: string): Promise<void> {
 }
 
 async function closeFolder(): Promise<void> {
-  for (const tab of [...state.tabs]) closeTabImmediate(tab.path);
+  if (!(await closeAllTabs())) return;
   setRoot(null);
   localStorage.removeItem("lscode.root");
   $("sidebar-body").innerHTML = "";
@@ -74,6 +86,7 @@ async function restoreWorkspace(): Promise<void> {
   if (!root || !hasTauriBackend) return;
   try {
     await listDir(root);
+    if (state.root !== null || localStorage.getItem("lscode.root") !== root) return;
     await setWorkspace(root);
   } catch {
     localStorage.removeItem("lscode.root");

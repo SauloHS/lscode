@@ -22,6 +22,7 @@ export function basename(path: string): string {
 export function dirname(path: string): string {
   const norm = path.replace(/\\/g, "/");
   const idx = norm.lastIndexOf("/");
+  if (idx < 0) return ".";
   if (idx <= 0) return path.includes("\\") && !norm.startsWith("/") ? norm.slice(0, norm.indexOf("\\") + 1) || path : norm.slice(0, idx) || path;
   return norm.slice(0, idx);
 }

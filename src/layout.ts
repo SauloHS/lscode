@@ -14,7 +14,8 @@ function initSidebarResizer(): void {
   });
   window.addEventListener("mousemove", (e) => {
     if (!dragging) return;
-    const width = Math.min(Math.max(e.clientX - 48, 170), window.innerWidth - 300);
+    const maxWidth = Math.max(0, window.innerWidth - 300);
+    const width = Math.min(Math.max(e.clientX - 48, Math.min(170, maxWidth)), maxWidth);
     document.documentElement.style.setProperty("--sidebar-width", width + "px");
   });
   window.addEventListener("mouseup", () => {
@@ -33,7 +34,8 @@ function initPanelResizer(): void {
   });
   window.addEventListener("mousemove", (e) => {
     if (!dragging) return;
-    const height = Math.min(Math.max(window.innerHeight - e.clientY - 22, 100), window.innerHeight - 200);
+    const maxHeight = Math.max(0, window.innerHeight - 200);
+    const height = Math.min(Math.max(window.innerHeight - e.clientY - 22, Math.min(100, maxHeight)), maxHeight);
     document.documentElement.style.setProperty("--panel-height", height + "px");
   });
   window.addEventListener("mouseup", () => {

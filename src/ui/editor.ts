@@ -35,6 +35,10 @@ export async function openFile(path: string): Promise<void> {
     console.error(e);
     return;
   }
+  if (findTab(path)) {
+    activateTab(path);
+    return;
+  }
   const model = monaco.editor.getModel(monaco.Uri.file(path));
   const textModel = model ?? monaco.editor.createModel(content, languageFor(path), monaco.Uri.file(path));
   if (model) textModel.setValue(content);
@@ -67,7 +71,7 @@ export async function closeTab(path: string): Promise<void> {
   if (isDirty(tab)) {
     const { confirmDialog } = await import("../overlay");
     const sure = await confirmDialog(`Do you want to save the changes you made to ${basename(path)}?`, "Save");
-    if (sure) await saveTab(tab);
+    if (sure && !(await saveTab(tab))) return;
   }
   state.tabs.splice(idx, 1);
   tab.model.dispose();
@@ -103,14 +107,17 @@ export function closeTabImmediate(path: string): void {
   }
 }
 
-async function saveTab(tab: { path: string; model: monaco.editor.ITextModel; savedVersionId: number }): Promise<void> {
+export async function saveTab(tab: { path: string; model: monaco.editor.ITextModel; savedVersionId: number }): Promise<boolean> {
   try {
     await writeFile(tab.path, tab.model.getValue());
     tab.savedVersionId = tab.model.getAlternativeVersionId();
   } catch (e) {
     console.error(e);
+    notify();
+    return false;
   }
   notify();
+  return true;
 }
 
 export async function saveActive(): Promise<void> {

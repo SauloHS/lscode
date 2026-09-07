@@ -127,12 +127,24 @@ export async function newFolder(dir: string): Promise<void> {
   await refreshTree();
 }
 
+function isUnder(path: string, root: string): boolean {
+  return path === root || path.startsWith(root + "\\") || path.startsWith(root + "/");
+}
+
+function retargetTabs(oldPath: string, newPath: string): void {
+  for (const tab of state.tabs) {
+    if (tab.path === oldPath) tab.path = newPath;
+    else if (isUnder(tab.path, oldPath)) tab.path = newPath + tab.path.slice(oldPath.length);
+  }
+}
+
 async function rename(entry: FsEntry): Promise<void> {
   const { promptDialog } = await import("../overlay");
   const name = await promptDialog("Rename", entry.name);
   if (!name || name === entry.name) return;
-  await renamePath(entry.path, joinPath(dirname(entry.path), name));
-  closeTabImmediate(entry.path);
+  const newPath = joinPath(dirname(entry.path), name);
+  await renamePath(entry.path, newPath);
+  retargetTabs(entry.path, newPath);
   await refreshTree();
 }
 
@@ -141,7 +153,9 @@ async function remove(entry: FsEntry): Promise<void> {
   const sure = await confirmDialog(`Are you sure you want to delete '${entry.name}'?`);
   if (!sure) return;
   await deletePath(entry.path);
-  closeTabImmediate(entry.path);
+  for (const tab of [...state.tabs]) {
+    if (isUnder(tab.path, entry.path)) closeTabImmediate(tab.path);
+  }
   await refreshTree();
 }
 

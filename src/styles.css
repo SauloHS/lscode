@@ -119,9 +119,15 @@ body {
   cursor: default;
   color: var(--sidebar-fg);
   white-space: nowrap;
+  width: 100%;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
 }
 
-.menu-item:hover {
+.menu-item:hover,
+.menu-item:focus-visible {
   background: var(--list-active-bg);
   color: var(--list-active-fg);
 }
@@ -345,7 +351,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: currentColor;
+  background: currentcolor;
   visibility: hidden;
 }
 

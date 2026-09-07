@@ -6,7 +6,7 @@ import { basename, el, relative, $ } from "../util";
 
 let caseSensitive = false;
 let matches: SearchMatch[] = [];
-let currentQuery = "";
+let searchRequestId = 0;
 
 export function initSearch(): void {
   const body = $("sidebar-body");
@@ -45,7 +45,7 @@ export function initSearch(): void {
 }
 
 async function run(query: string): Promise<void> {
-  currentQuery = query;
+  const requestId = ++searchRequestId;
   const results = document.querySelector("#sidebar-body .search-results") as HTMLElement | null;
   const summary = document.querySelector("#sidebar-body .search-summary") as HTMLElement | null;
   if (!results || !summary || !state.root || !query) {
@@ -55,7 +55,7 @@ async function run(query: string): Promise<void> {
     return;
   }
   matches = await searchFiles(state.root, query, caseSensitive);
-  if (currentQuery !== query) return;
+  if (requestId !== searchRequestId) return;
   summary.textContent = `${matches.length} results in ${new Set(matches.map((m) => m.path)).size} files`;
   results.innerHTML = "";
   renderMatches(results);
