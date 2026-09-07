@@ -1,6 +1,9 @@
 # LS Code guide to agents
 **Keep this file in sync with AGENTS.md**
 
+## Important info
+You are NOT vision capable, unless I explicitly said so.
+
 ## Project info
 **LS Code** (Lightweight Studio Code) is a VS Code clone, but built on Tauri instead of Electron.
 

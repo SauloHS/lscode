@@ -1,0 +1,16 @@
+export const icons = {
+  files: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9.5 1.5H3.5v13h9V4.5l-3-3z"/><path d="M9.5 1.5v3h3"/></svg>`,
+  search: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6.5" cy="6.5" r="4"/><path d="M9.5 9.5l4 4"/></svg>`,
+  chevron: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 3l5 5-5 5"/></svg>`,
+  folder: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 3v10h13V5H8L6.5 3h-5z"/></svg>`,
+  file: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 1.5h5l3 3V14.5H4z"/><path d="M9 1.5v3h3"/></svg>`,
+  newFile: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 1.5H3v13h10V5.5L9 1.5z"/><path d="M9 1.5v4h4"/><path d="M8 8v4M6 10h4"/></svg>`,
+  newFolder: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1.5 3v10h13V5H8L6.5 3h-5z"/><path d="M8 7v4M6 9h4"/></svg>`,
+  refresh: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2v3h-3"/></svg>`,
+  close: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 4l8 8M12 4l-8 8"/></svg>`,
+  terminal: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="2.5" width="13" height="11" rx="1"/><path d="M4.5 6l2 2-2 2M8.5 10.5h3"/></svg>`,
+  plus: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 3v10M3 8h10"/></svg>`,
+  trash: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.8 10h6.4L12 4"/></svg>`,
+  split: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="2.5" width="13" height="11" rx="1"/><path d="M8 2.5v11"/></svg>`,
+  case: `<svg viewBox="0 0 16 16" fill="currentColor"><text x="2" y="11.5" font-size="9" font-family="serif">Aa</text></svg>`,
+};
