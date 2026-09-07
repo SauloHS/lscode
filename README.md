@@ -1,3 +1,6 @@
+![LS Code logo](./web/public/images/lscode.png)
+*LS Code's logo*
+
 # Lightweight Studio Code
 ![License](https://img.shields.io/github/license/SauloHS/lscode)
 ![Top Language](https://img.shields.io/github/languages/top/SauloHS/lscode)
