@@ -10,12 +10,12 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "withGlobalTauri": true,
+    "withGlobalTauri": false,
     "windows": [
       {
         "title": "LS Code",
-        "width": 800,
-        "height": 600
+        "width": 1200,
+        "height": 800
       }
     ],
     "security": {
