@@ -1,22 +1,43 @@
-import { invoke } from "@tauri-apps/api/core";
+import * as monaco from "monaco-editor";
+import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
+import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
+import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
+import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 
-let greetInputEl: HTMLInputElement | null;
-let greetMsgEl: HTMLElement | null;
+const monacoEnvironment: monaco.Environment = {
+  getWorker(_moduleId: string, label: string) {
+    switch (label) {
+      case "typescript":
+      case "javascript":
+        return new tsWorker();
+      case "css":
+      case "scss":
+      case "less":
+        return new cssWorker();
+      case "html":
+      case "handlebars":
+      case "razor":
+        return new htmlWorker();
+      case "json":
+        return new jsonWorker();
+      default:
+        return new editorWorker();
+    }
+  },
+};
 
-async function greet() {
-  if (greetMsgEl && greetInputEl) {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsgEl.textContent = await invoke("greet", {
-      name: greetInputEl.value,
-    });
-  }
-}
+self.MonacoEnvironment = monacoEnvironment;
 
-window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    greet();
-  });
+monaco.editor.create(document.getElementById("editor")!, {
+  value: [
+    "function greet(name: string): string {",
+    "  return `Hello, ${name}!`;",
+    "}",
+    "",
+    "greet('LS Code');",
+  ].join("\n"),
+  language: "typescript",
+  theme: "vs-dark",
+  automaticLayout: true,
 });
