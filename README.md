@@ -25,6 +25,34 @@ There are many ways for you to contribute to this project:
 ### Issues
 While filing an issue, the most information you can give us, the better. Include LS Code's version, OS, and how to replicate the bug, and we'll do our best to fix it.
 
+## Building
+This project uses Bun. To download Bun:<br>
+On Windows:
+```bash
+irm bun.sh/install.ps1|iex # powershell
+npm install -g bun         # npm
+scoop install bun          # scoop
+choco install bun          # chocolatey
+```
+
+On Linux:
+```bash
+curl -fsSL https://bun.sh/install | bash  # curl
+npm install -g bun                        # npm
+```
+
+On Mac:
+```bash
+brew tap oven-sh/bun                        # homebrew
+brew install bun
+curl -fsSL https://bun.sh/install | bash    # curl
+npm install -g bun                          # npm
+```
+
+To build the project, you need `cargo` (and `rustc`) available.
+
+Run `bun run tauri dev` to build it from source.
+
 ## License
 Copyright (c) Saulo Henrique and Lightweight Studio Code contributors. All rights reserved.
 Lightweight Studio Code is licensed under the [GPL-3](LICENSE) license.

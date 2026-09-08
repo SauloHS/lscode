@@ -21,6 +21,7 @@ let active: number | null = null;
 let outputDecoder: TextDecoder | null = null;
 
 export function initTerminal(): void {
+  if (!hasTauriBackend) return;
   const actions = $("panel-actions");
   actions.innerHTML = "";
   const newBtn = el("button");
@@ -51,9 +52,9 @@ export function initTerminal(): void {
 }
 
 export async function newTerminal(): Promise<void> {
+  if (!hasTauriBackend) return;
   const panel = $("panel");
   if (panel.classList.contains("hidden")) togglePanel(true);
-  if (!hasTauriBackend) return;
 
   const s = settings();
   const term = new Terminal({
@@ -140,7 +141,7 @@ function killActive(): void {
 export function togglePanel(show?: boolean): void {
   const panel = $("panel");
   const resizer = $("panel-resizer");
-  const visible = show ?? panel.classList.contains("hidden");
+  const visible = hasTauriBackend ? show ?? panel.classList.contains("hidden") : false;
   panel.classList.toggle("hidden", !visible);
   resizer.classList.toggle("hidden", !visible);
   state.panelVisible = visible;

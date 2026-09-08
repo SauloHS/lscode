@@ -12,6 +12,8 @@ import { initLayout } from "./layout";
 import { applySettings, settings, updateSettings } from "./settings";
 import { notify, setRoot, state, subscribe, isDirty } from "./state";
 import { $, el, basename } from "./util";
+import * as webfs from "./webfs";
+import type { DirHandleLike } from "./webfs";
 import { initEditor, getEditor, saveActive, saveAll, saveTab, closeTab, closeTabImmediate, refreshTheme, refreshFont, renderBreadcrumbs } from "./ui/editor";
 import { initTabs } from "./ui/tabs";
 import { initActivitybar, initSidebar, switchView } from "./ui/sidebar";
@@ -46,10 +48,68 @@ const monacoEnvironment: monaco.Environment = {
 
 self.MonacoEnvironment = monacoEnvironment;
 
+const WEB_MAX_FILE_BYTES = 1_000_000;
+
 async function openFolder(): Promise<void> {
-  if (!hasTauriBackend) return;
+  if (!hasTauriBackend) {
+    await openFolderWeb();
+    return;
+  }
   const dir = await open({ directory: true, multiple: false });
   if (typeof dir === "string" && dir.length > 0) await setWorkspace(dir);
+}
+
+async function openFolderWeb(): Promise<void> {
+  const picker = (window as unknown as { showDirectoryPicker?: () => Promise<DirHandleLike> })
+    .showDirectoryPicker;
+  if (picker) {
+    try {
+      const dir = await picker.call(window);
+      webfs.clear();
+      await collectDir(dir, "");
+      await setWorkspace(dir.name);
+    } catch {
+      // user cancelled or denied access
+    }
+    return;
+  }
+  const picked = await pickFolder();
+  if (picked.length === 0) return;
+  const root = picked[0].webkitRelativePath.split("/")[0];
+  webfs.clear();
+  for (const file of picked) {
+    const parts = file.webkitRelativePath.split("/");
+    if (parts.slice(1, -1).some((seg) => webfs.IGNORED_DIRS.includes(seg))) continue;
+    if (file.size > WEB_MAX_FILE_BYTES) continue;
+    webfs.addFile(file.webkitRelativePath, await file.text());
+  }
+  await setWorkspace(root);
+}
+
+async function collectDir(dir: DirHandleLike, prefix: string): Promise<void> {
+  for await (const entry of dir.values()) {
+    const path = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.kind === "directory") {
+      if (webfs.IGNORED_DIRS.includes(entry.name)) continue;
+      webfs.createDir(path);
+      await collectDir(entry, path);
+    } else {
+      const file = await entry.getFile();
+      if (file.size > WEB_MAX_FILE_BYTES) continue;
+      webfs.addFile(path, await file.text(), entry);
+    }
+  }
+}
+
+function pickFolder(): Promise<File[]> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    (input as HTMLInputElement & { webkitdirectory: boolean }).webkitdirectory = true;
+    input.addEventListener("change", () => resolve(input.files ? [...input.files] : []));
+    input.click();
+  });
 }
 
 async function closeAllTabs(): Promise<boolean> {
@@ -77,6 +137,7 @@ async function closeFolder(): Promise<void> {
   if (!(await closeAllTabs())) return;
   setRoot(null);
   localStorage.removeItem("lscode.root");
+  if (!hasTauriBackend) webfs.clear();
   $("sidebar-body").innerHTML = "";
   notify();
 }
@@ -137,8 +198,6 @@ function registerCommands(): void {
     state.sidebarVisible = !state.sidebarVisible;
     notify();
   } });
-  register({ id: "workbench.togglePanel", label: "View: Toggle Terminal", keybinding: "Ctrl+`", run: () => togglePanel() });
-  register({ id: "workbench.toggleTheme", label: "Preferences: Toggle Theme", run: toggleTheme });
   register({ id: "workbench.increaseFont", label: "View: Increase Font Size", run: () => {
     updateSettings({ fontSize: Math.min(settings().fontSize + 1, 30) });
     refreshFont();
@@ -149,9 +208,13 @@ function registerCommands(): void {
     refreshFont();
     refreshTerminalTheme();
   } });
-  register({ id: "terminal.new", label: "Terminal: Create New Terminal", keybinding: "Ctrl+Shift+`", run: () => void newTerminal() });
   register({ id: "help.about", label: "Help: About", run: () => void confirmDialog("LS Code 0.1.0 — Lightweight VS Code clone on Tauri", "OK") });
   register({ id: "workbench.refreshExplorer", label: "File: Refresh Explorer", run: () => void refreshExplorer() });
+  register({ id: "workbench.toggleTheme", label: "Preferences: Toggle Theme", run: toggleTheme });
+  if (hasTauriBackend) {
+    register({ id: "workbench.togglePanel", label: "View: Toggle Terminal", keybinding: "Ctrl+`", run: () => togglePanel() });
+    register({ id: "terminal.new", label: "Terminal: Create New Terminal", keybinding: "Ctrl+Shift+`", run: () => void newTerminal() });
+  }
 }
 
 function initKeybindings(): void {
@@ -159,7 +222,7 @@ function initKeybindings(): void {
     "keydown",
     (e) => {
       if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
-      if (e.code === "Backquote") {
+      if (e.code === "Backquote" && hasTauriBackend) {
         e.preventDefault();
         if (e.shiftKey) void newTerminal();
         else togglePanel();
@@ -196,13 +259,20 @@ function renderWelcome(): void {
   const title = el("h1", undefined, "LS Code");
   const hint = el("div", "hint", "Editing evolved, without the weight");
   const list = el("div");
-  const shortcuts: [string, string][] = [
-    ["Show All Commands", "Ctrl+Shift+P"],
-    ["Go to File", "Ctrl+P"],
-    ["Open Folder", "Ctrl+K Ctrl+O"],
-    ["Toggle Terminal", "Ctrl+`"],
-    ["Toggle Sidebar", "Ctrl+B"],
-  ];
+  const shortcuts: [string, string][] = hasTauriBackend
+    ? [
+        ["Show All Commands", "Ctrl+Shift+P"],
+        ["Go to File", "Ctrl+P"],
+        ["Open Folder", "Ctrl+K Ctrl+O"],
+        ["Toggle Terminal", "Ctrl+`"],
+        ["Toggle Sidebar", "Ctrl+B"],
+      ]
+    : [
+        ["Show All Commands", "Ctrl+Shift+P"],
+        ["Go to File", "Ctrl+P"],
+        ["Open Folder", "Ctrl+K Ctrl+O"],
+        ["Toggle Sidebar", "Ctrl+B"],
+      ];
   for (const [label, kbd] of shortcuts) {
     const row = el("div", "shortcut");
     row.append(el("kbd", undefined, kbd), document.createTextNode("  " + label));

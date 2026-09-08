@@ -50,6 +50,34 @@ h1, h2, h3, h4 {
   margin-top: 0.1rem;
 }
 
+.try-button {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-bg);
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.65rem 1.5rem;
+  margin-top: 2rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.try-button:hover {
+  background: #e1e0d9;
+}
+
+.navbar .try-button {
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  margin-top: 0;
+}
+
+.navbar .try-button,
+.navbar .try-button:hover {
+  color: var(--color-bg);
+}
+
 .hero {
   display: flex;
   justify-content: center;

@@ -16,6 +16,7 @@ export function Navbar() {
       <div className="navbar-links">
         <a href="#features">Features</a>
         <a href="#about">About</a>
+        <a className="try-button" href="/app.html">Try on browser</a>
         <a href="https://github.com/SauloHS/lscode"
           target="_blank"
           rel="noopener noreferrer"
