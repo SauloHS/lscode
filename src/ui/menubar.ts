@@ -1,3 +1,4 @@
+import { hasTauriBackend } from "../api";
 import { runCommand } from "../commands";
 import { el, $ } from "../util";
 
@@ -45,17 +46,23 @@ export function initMenubar(): void {
         { label: "Search", run: () => runCommand("workbench.showSearch"), kbd: "Ctrl+Shift+F" },
         "separator",
         { label: "Toggle Sidebar", run: () => runCommand("workbench.toggleSidebar"), kbd: "Ctrl+B" },
-        { label: "Toggle Terminal", run: () => runCommand("workbench.togglePanel"), kbd: "Ctrl+`" },
+        ...(hasTauriBackend
+          ? [{ label: "Toggle Terminal", run: () => runCommand("workbench.togglePanel"), kbd: "Ctrl+`" }]
+          : []),
         { label: "Toggle Theme", run: () => runCommand("workbench.toggleTheme") },
       ],
     },
-    {
-      label: "Terminal",
-      entries: [
-        { label: "New Terminal", run: () => runCommand("terminal.new"), kbd: "Ctrl+Shift+`" },
-        { label: "Toggle Terminal", run: () => runCommand("workbench.togglePanel"), kbd: "Ctrl+`" },
-      ],
-    },
+    ...(hasTauriBackend
+      ? [
+          {
+            label: "Terminal",
+            entries: [
+              { label: "New Terminal", run: () => runCommand("terminal.new"), kbd: "Ctrl+Shift+`" },
+              { label: "Toggle Terminal", run: () => runCommand("workbench.togglePanel"), kbd: "Ctrl+`" },
+            ],
+          } satisfies MenuDef,
+        ]
+      : []),
     {
       label: "Help",
       entries: [{ label: "About", run: () => runCommand("help.about") }],

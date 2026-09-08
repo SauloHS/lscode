@@ -22,3 +22,4 @@ LS Code's main goal is to be the same as VS Code, support the same extensions, f
 - YAGNI: You Ain't Gonna Need It
 - DRY: Don't Repeat Yourself
 - The Boy Scout Rule: Make the code cleaner than what you found
+- Use skills, mcp's and plugins. Everything is good if it makes your output better.

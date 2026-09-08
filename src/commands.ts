@@ -10,7 +10,7 @@ const commands = new Map<string, Command>();
 export function register(cmd: Command): void {
   commands.set(cmd.id, cmd);
 }
-
+ 
 export function getCommands(): Command[] {
   return [...commands.values()];
 }

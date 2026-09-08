@@ -7,6 +7,18 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
+    "paths": {
+      "monaco-editor": ["./node_modules/monaco-editor"],
+      "monaco-editor/*": ["./node_modules/monaco-editor/*"],
+      "@tauri-apps/api": ["./node_modules/@tauri-apps/api"],
+      "@tauri-apps/api/*": ["./node_modules/@tauri-apps/api/*"],
+      "@tauri-apps/plugin-dialog": ["./node_modules/@tauri-apps/plugin-dialog"],
+      "@tauri-apps/plugin-opener": ["./node_modules/@tauri-apps/plugin-opener"],
+      "@xterm/xterm": ["./node_modules/@xterm/xterm"],
+      "@xterm/xterm/*": ["./node_modules/@xterm/xterm/*"],
+      "@xterm/addon-fit": ["./node_modules/@xterm/addon-fit"],
+      "@xterm/addon-fit/*": ["./node_modules/@xterm/addon-fit/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
